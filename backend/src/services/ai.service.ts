@@ -9,7 +9,6 @@ export class AIService {
     prompt: string,
     userId: string,
     projectId: string,
-    productId: string
   ) {
     try {
       // 1. Build a detailed prompt that includes the style
@@ -59,7 +58,6 @@ export class AIService {
         data: {
           userId,
           projectId,
-          productId,
           type: 'GENERATED',
           originalName: `gemini_generated_${Date.now()}`,
           secureUrl: (result as any).secure_url,
