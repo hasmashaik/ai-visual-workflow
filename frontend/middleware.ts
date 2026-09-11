@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Check for token in cookies
   const token = request.cookies.get('token')?.value;
   const { pathname } = request.nextUrl;
   
@@ -14,15 +13,12 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/assets') ||
     pathname.startsWith('/reviews') ||
     pathname.startsWith('/history') ||
-    pathname.startsWith('/analytics') ||
     pathname.startsWith('/settings');
 
-  // If user has token and tries to access auth pages, redirect to dashboard
   if (isAuthPage && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If user doesn't have token and tries to access protected pages, redirect to login
   if (isProtected && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }

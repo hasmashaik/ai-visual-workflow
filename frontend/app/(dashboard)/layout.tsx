@@ -63,8 +63,8 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     try {
-      // 1. Call logout API to clear cookie on server
-      await fetch('http://localhost:5000/api/auth/logout', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      await fetch(`${apiUrl}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -72,18 +72,17 @@ export default function DashboardLayout({
       // Ignore error if API fails
     }
 
-    // 2. Clear localStorage
+    // Clear localStorage
     localStorage.removeItem('token');
-    
-    // 3. Clear all cookies
-    document.cookie.split(';').forEach(function(c) {
-      document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+
+    // Clear all cookies
+    document.cookie.split(';').forEach(function (c) {
+      document.cookie = c
+        .replace(/^ +/, '')
+        .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
     });
 
-    // 4. Show success message
     toast.success('Logged out successfully');
-
-    // 5. Redirect to login page
     router.push('/login');
   };
 
@@ -98,11 +97,11 @@ export default function DashboardLayout({
   };
 
   const markAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+    setNotifications(notifications.map((n) => ({ ...n, read: true })));
     toast.success('All notifications marked as read');
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   if (!mounted) {
     return null;
@@ -111,12 +110,14 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-[#070A12]">
       {/* Sidebar */}
-      <div className={`
-        fixed lg:relative inset-y-0 left-0 z-40 w-64 bg-[#0D111C] border-r border-[#1E293B]
-        transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        flex flex-col h-full
-      `}>
+      <div
+        className={`
+          fixed lg:relative inset-y-0 left-0 z-40 w-64 bg-[#0D111C] border-r border-[#1E293B]
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          flex flex-col h-full
+        `}
+      >
         {/* Logo */}
         <div className="p-6 border-b border-[#1E293B] flex-shrink-0">
           <Link href="/dashboard" className="flex items-center gap-3">
@@ -124,7 +125,9 @@ export default function DashboardLayout({
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-lg font-bold text-white tracking-tight">VisualForge AI</span>
+              <span className="text-lg font-bold text-white tracking-tight">
+                VisualForge AI
+              </span>
               <p className="text-xs text-[#64748B]">Create. Review. Approve.</p>
             </div>
           </Link>
@@ -133,7 +136,8 @@ export default function DashboardLayout({
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+            const isActive =
+              pathname === item.href || pathname?.startsWith(item.href + '/');
             return (
               <Link
                 key={item.href}
@@ -141,9 +145,10 @@ export default function DashboardLayout({
                 onClick={() => setSidebarOpen(false)}
                 className={`
                   flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
-                  ${isActive 
-                    ? 'bg-[#7C3AED]/20 text-[#7C3AED]' 
-                    : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
+                  ${
+                    isActive
+                      ? 'bg-[#7C3AED]/20 text-[#7C3AED]'
+                      : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
                   }
                 `}
               >
@@ -176,8 +181,15 @@ export default function DashboardLayout({
             </div>
             <span className="text-sm font-bold text-white">VisualForge AI</span>
           </div>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white">
-            {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="text-white"
+          >
+            {sidebarOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -201,7 +213,9 @@ export default function DashboardLayout({
               {notificationOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-[#111827] border border-[#1E293B] rounded-xl shadow-2xl shadow-black/50 z-50">
                   <div className="flex items-center justify-between p-4 border-b border-[#1E293B]">
-                    <h3 className="text-sm font-semibold text-white">Notifications</h3>
+                    <h3 className="text-sm font-semibold text-white">
+                      Notifications
+                    </h3>
                     <button
                       onClick={markAllRead}
                       className="text-xs text-[#7C3AED] hover:text-[#6D2DE0] transition-colors"
@@ -222,10 +236,20 @@ export default function DashboardLayout({
                             !notification.read ? 'bg-[#7C3AED]/5' : ''
                           }`}
                         >
-                          <p className={`text-sm ${!notification.read ? 'text-white' : 'text-[#94A3B8]'}`}>
+                          <p
+                            className={`text-sm ${
+                              !notification.read ? 'text-white' : 'text-[#94A3B8]'
+                            }`}
+                          >
                             {notification.message}
                           </p>
-                          <span className={`text-xs ${!notification.read ? 'text-[#7C3AED]' : 'text-[#64748B]'}`}>
+                          <span
+                            className={`text-xs ${
+                              !notification.read
+                                ? 'text-[#7C3AED]'
+                                : 'text-[#64748B]'
+                            }`}
+                          >
                             {!notification.read ? 'New' : 'Read'}
                           </span>
                         </div>
@@ -254,7 +278,9 @@ export default function DashboardLayout({
                 <div className="absolute right-0 mt-2 w-48 bg-[#111827] border border-[#1E293B] rounded-xl shadow-2xl shadow-black/50 z-50">
                   <div className="p-3 border-b border-[#1E293B]">
                     <p className="text-sm font-medium text-white">Account</p>
-                    <p className="text-xs text-[#64748B]">Manage your profile</p>
+                    <p className="text-xs text-[#64748B]">
+                      Manage your profile
+                    </p>
                   </div>
                   <div className="p-1">
                     <Link

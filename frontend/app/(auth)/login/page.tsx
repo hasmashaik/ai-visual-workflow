@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Mail, Lock, Sparkles, Eye, EyeOff, ArrowRight, Zap, Shield, Camera } from 'lucide-react';
+import { Mail, Lock, Sparkles, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 
 const schema = z.object({
@@ -27,7 +27,14 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await api.post('/auth/login', data);
-      localStorage.setItem('token', res.data.data.token);
+      const token = res.data.data.token;
+
+      // 1. Store token in localStorage (for API client)
+      localStorage.setItem('token', token);
+
+      // 2. Store token in cookie (for middleware route protection)
+      document.cookie = `token=${token}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
+
       toast.success('Welcome back!');
       router.push('/dashboard');
     } catch (error: any) {
@@ -39,7 +46,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#070A12] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Effects */}
+      {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[#7C3AED]/10 blur-[120px]"></div>
         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#06B6D4]/10 blur-[120px]"></div>
@@ -51,7 +58,7 @@ export default function LoginPage() {
 
       <div className="relative w-full max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-0 items-center min-h-[600px]">
-          
+
           {/* LEFT SIDE - Branding */}
           <div className="hidden lg:flex flex-col justify-center space-y-8 p-8 pr-12">
             <div className="flex items-center gap-3">
@@ -113,9 +120,7 @@ export default function LoginPage() {
                         placeholder="you@example.com"
                       />
                     </div>
-                    {errors.email && (
-                      <p className="text-sm text-[#EF4444] mt-1.5">{errors.email.message}</p>
-                    )}
+                    {errors.email && <p className="text-sm text-[#EF4444] mt-1.5">{errors.email.message}</p>}
                   </div>
 
                   <div>
@@ -136,9 +141,7 @@ export default function LoginPage() {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    {errors.password && (
-                      <p className="text-sm text-[#EF4444] mt-1.5">{errors.password.message}</p>
-                    )}
+                    {errors.password && <p className="text-sm text-[#EF4444] mt-1.5">{errors.password.message}</p>}
                   </div>
 
                   <button
