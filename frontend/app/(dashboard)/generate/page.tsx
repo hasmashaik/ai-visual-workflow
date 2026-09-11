@@ -64,29 +64,25 @@ export default function GeneratePage() {
       formDataImage.append('image', selectedImage);
       formDataImage.append('projectId', formData.projectId);
       formDataImage.append('type', 'PRODUCT');
-      
-      console.log('Uploading product image...');
+
       const uploadRes = await api.post('/images/upload', formDataImage, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
-      console.log('Image uploaded:', uploadRes.data.data.id);
 
-      // 2. Generate visuals - call the generation API directly
-      console.log('Generating visuals...');
-      const generateRes = await api.post('/generations', {
+      // 2. Generate visuals — pass variations count
+      await api.post('/generations', {
         projectId: formData.projectId,
-        prompt: formData.prompt || 'Create a premium e-commerce product visual with soft studio lighting, clean background, realistic shadows and luxury advertising style.',
+        prompt:
+          formData.prompt ||
+          'Create a premium e-commerce product visual with soft studio lighting, clean background, realistic shadows and luxury advertising style.',
         style: formData.style,
         imageId: uploadRes.data.data.id,
+        variations: formData.variations,
       });
 
-      console.log('Generation complete:', generateRes.data);
-
-      toast.success('Visuals generated successfully!');
+      toast.success(`Generated ${formData.variations} variation${formData.variations > 1 ? 's' : ''}!`);
       router.push('/assets');
     } catch (error: any) {
-      console.error('Generation error:', error.response?.data || error.message);
       toast.error(error.response?.data?.message || 'Generation failed. Please try again.');
     } finally {
       setLoading(false);
@@ -141,7 +137,7 @@ export default function GeneratePage() {
                   <Palette className="w-5 h-5 text-[#7C3AED]" />
                   Settings
                 </h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-[#94A3B8] mb-1.5">Project</label>
@@ -152,7 +148,9 @@ export default function GeneratePage() {
                     >
                       <option value="">Select a project</option>
                       {projects.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -165,7 +163,9 @@ export default function GeneratePage() {
                       className="w-full bg-[#0B1220] border border-[#1E293B] rounded-xl py-2.5 px-4 text-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 text-sm"
                     >
                       {styles.map((style) => (
-                        <option key={style} value={style}>{style}</option>
+                        <option key={style} value={style}>
+                          {style}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -182,16 +182,23 @@ export default function GeneratePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#94A3B8] mb-1.5">Number of Variations</label>
+                    <label className="block text-sm font-medium text-[#94A3B8] mb-1.5">
+                      Number of Variations
+                    </label>
                     <select
                       value={formData.variations}
                       onChange={(e) => setFormData({ ...formData, variations: Number(e.target.value) })}
                       className="w-full bg-[#0B1220] border border-[#1E293B] rounded-xl py-2.5 px-4 text-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 text-sm"
                     >
                       {[1, 2, 3, 4].map((n) => (
-                        <option key={n} value={n}>{n}</option>
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
                       ))}
                     </select>
+                    <p className="text-xs text-[#64748B] mt-1.5">
+                      Generates {formData.variations} image{formData.variations > 1 ? 's' : ''}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -207,10 +214,14 @@ export default function GeneratePage() {
                 <p className="text-[#94A3B8] text-sm max-w-md">
                   Upload a product image, select your settings, and let AI create stunning visuals for your product.
                 </p>
-                
+
                 {previewUrl && (
                   <div className="mt-4 w-full">
-                    <img src={previewUrl} alt="Product" className="w-full max-h-48 object-contain rounded-lg bg-[#0B1220] p-4" />
+                    <img
+                      src={previewUrl}
+                      alt="Product"
+                      className="w-full max-h-48 object-contain rounded-lg bg-[#0B1220] p-4"
+                    />
                   </div>
                 )}
 
@@ -222,11 +233,11 @@ export default function GeneratePage() {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Generating...
+                      Generating {formData.variations} image{formData.variations > 1 ? 's' : ''}...
                     </>
                   ) : (
                     <>
-                      Generate Visuals
+                      Generate {formData.variations} Visual{formData.variations > 1 ? 's' : ''}
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
